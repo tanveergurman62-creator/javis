@@ -1,3 +1,4 @@
+const HUGGINGFACE_API_KEY = "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";
 const input = document.getElementById("user-input");
 const btn = document.getElementById("send-btn");
 const chatBox = document.getElementById("chat-box");
@@ -21,12 +22,16 @@ async function sendMessage(){
   try {
     // NOTE: This example calls a Hugging Face public model endpoint without an API key.
     // It may be rate limited, blocked by CORS, or return short replies.
-    const resp = await fetch("https://api-inference.huggingface.co/models/gpt2", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: text })
-    });
-    const data = await resp.json();
+    const response = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ inputs: text })
+});
+
+   const data = await resp.json();
     const reply = data[0]?.generated_text?.slice(text.length).trim() || "Sorry, I couldn't understand that.";
     chatBox.removeChild(typing);
     chatBox.innerHTML += `<div class="message bot"><b>AI:</b> ${escapeHtml(reply)}</div>`;
@@ -42,3 +47,4 @@ async function sendMessage(){
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
+
