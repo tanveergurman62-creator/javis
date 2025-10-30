@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My ChatGPT Clone</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Chatbot by Tanveer</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chatgpt-ui">
-    <header><h1>?? My ChatGPT Clone</h1></header>
-    <main id="chat-box"></main>
-    <footer>
-      <input id="user-input" type="text" placeholder="Send a message..." />
-      <button id="send-btn">?</button>
-    </footer>
+  <div class="chat-container">
+    <h1>🤖 Tanveer's AI Chatbot</h1>
+
+    <div id="chat-box" class="chat-box">
+      <div class="bot"><b>Bot:</b> Hello! How can I help you today?</div>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Type your message..." />
+      <button id="send-btn">Send</button>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
