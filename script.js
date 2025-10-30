@@ -1,57 +1,51 @@
-// === Tanveer's AI Chatbot Script ===
+const API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
 
-// Get HTML elements
-const form = document.querySelector("form");
-const input = document.querySelector("input");
-const chatBox = document.querySelector("#chat-box");
+// ✅ Use your secret from GitHub Actions (or .env if local)
+const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
-// Chatbot title greeting
-addMessage("Bot", "Hello! How can I help you today?");
+// Chat elements
+const sendBtn = document.getElementById("send-btn");
+const userInput = document.getElementById("user-input");
+const chatBox = document.getElementById("chat-box");
 
-// Add message bubbles to the chat
+// Function to add message to chat
 function addMessage(sender, text) {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", sender.toLowerCase());
-  messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-  chatBox.appendChild(messageDiv);
+  const message = document.createElement("div");
+  message.className = sender === "user" ? "user-message" : "bot-message";
+  message.textContent = `${sender === "user" ? "You" : "Bot"}: ${text}`;
+  chatBox.appendChild(message);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Handle form submission
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const userInput = input.value.trim();
-  if (!userInput) return;
+// Send message
+sendBtn.addEventListener("click", async () => {
+  const input = userInput.value.trim();
+  if (!input) return;
 
-  addMessage("You", userInput);
-  input.value = "";
+  addMessage("user", input);
+  userInput.value = "";
 
   try {
-    // === Make API call to Hugging Face ===
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // API key comes from GitHub Secret (set securely)
-          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-        },
-        body: JSON.stringify({
-          inputs: userInput,
-          parameters: { max_new_tokens: 150 },
-        }),
-      }
-    );
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${HF_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ inputs: input }),
+    });
 
-    if (!response.ok) throw new Error("Failed to fetch response");
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const data = await response.json();
     const botReply = data[0]?.generated_text || "Sorry, I couldn’t understand that.";
-    addMessage("Bot", botReply);
+    addMessage("bot", botReply);
 
   } catch (error) {
     console.error(error);
-    addMessage("Bot", "Error: Unable to connect to AI service.");
+    addMessage("bot", "⚠️ Error connecting to AI service. Check your API key or network.");
   }
 });
+
+// Default greeting
+addMessage("bot", "Hello! How can I help you today?");
