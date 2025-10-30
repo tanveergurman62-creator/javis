@@ -29,13 +29,13 @@ async function sendMessage() {
       {
         method: "POST",
         headers: {
-          Authorization: "Bearer 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",
+          Authorization: "Bearer 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",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           inputs: text,
           parameters: {
-            max_new_tokens: 200,
+            max_new_tokens: 250,
             temperature: 0.7,
             return_full_text: false,
           },
@@ -48,23 +48,22 @@ async function sendMessage() {
 
     let botReply = "Sorry, I couldn’t understand that.";
 
-    // ✅ Check all possible Hugging Face response formats
-    if (Array.isArray(data) && data.length > 0 && data[0].generated_text) {
+    // ✅ Handle multiple response formats from Hugging Face
+    if (Array.isArray(data) && data[0]?.generated_text) {
       botReply = data[0].generated_text;
     } else if (data.generated_text) {
       botReply = data.generated_text;
-    } else if (data[0]?.content) {
-      botReply = data[0].content;
     } else if (data.error) {
       botReply = `Error: ${data.error}`;
     }
 
-    // Replace placeholder "Thinking..." with AI response
+    // Replace "Thinking..." with the bot's actual reply
     const lastBotMsg = chatBox.querySelector(".bot-message:last-child");
     lastBotMsg.innerHTML = `<b>Bot:</b> ${botReply}`;
   } catch (error) {
     console.error("Fetch error:", error);
     const lastBotMsg = chatBox.querySelector(".bot-message:last-child");
-    lastBotMsg.innerHTML = `<b>Bot:</b> ⚠️ Something went wrong. Check your API key or network.`;
+    lastBotMsg.innerHTML =
+      "<b>Bot:</b> ⚠️ Something went wrong. Please check your API key or try again later.";
   }
 }
