@@ -1,71 +1,57 @@
-const sendButton = document.getElementById("send-btn");
-const userInput = document.getElementById("user-input");
-const chatBox = document.getElementById("chat-box");
+// === Tanveer's AI Chatbot Script ===
 
-// Event listeners
-sendButton.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
+// Get HTML elements
+const form = document.querySelector("form");
+const input = document.querySelector("input");
+const chatBox = document.querySelector("#chat-box");
 
-function appendMessage(sender, text, className) {
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add(className);
-  msgDiv.innerHTML = `<b>${sender}:</b> ${text}`;
-  chatBox.appendChild(msgDiv);
+// Chatbot title greeting
+addMessage("Bot", "Hello! How can I help you today?");
+
+// Add message bubbles to the chat
+function addMessage(sender, text) {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message", sender.toLowerCase());
+  messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  chatBox.appendChild(messageDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-async function sendMessage() {
-  const text = userInput.value.trim();
-  if (!text) return;
+// Handle form submission
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const userInput = input.value.trim();
+  if (!userInput) return;
 
-  appendMessage("You", text, "user-message");
-  userInput.value = "";
-  appendMessage("Bot", "Thinking...", "bot-message");
+  addMessage("You", userInput);
+  input.value = "";
 
   try {
+    // === Make API call to Hugging Face ===
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
       {
         method: "POST",
         headers: {
-          Authorization: "Bearer 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",
           "Content-Type": "application/json",
+          // API key comes from GitHub Secret (set securely)
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
         },
         body: JSON.stringify({
-          inputs: text,
-          parameters: {
-            max_new_tokens: 300,
-            temperature: 0.7,
-            top_p: 0.9,
-            return_full_text: false,
-          },
+          inputs: userInput,
+          parameters: { max_new_tokens: 150 },
         }),
       }
     );
 
+    if (!response.ok) throw new Error("Failed to fetch response");
+
     const data = await response.json();
-    console.log("API Response:", data);
+    const botReply = data[0]?.generated_text || "Sorry, I couldn’t understand that.";
+    addMessage("Bot", botReply);
 
-    let botReply = "Sorry, I couldn’t understand that.";
-
-    // Handle different response formats
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      botReply = data[0].generated_text;
-    } else if (data.generated_text) {
-      botReply = data.generated_text;
-    } else if (data.error) {
-      botReply = `⚠️ Error: ${data.error}`;
-    }
-
-    // Update the last bot message
-    const lastBotMsg = chatBox.querySelector(".bot-message:last-child");
-    lastBotMsg.innerHTML = `<b>Bot:</b> ${botReply}`;
   } catch (error) {
-    console.error("Fetch error:", error);
-    const lastBotMsg = chatBox.querySelector(".bot-message:last-child");
-    lastBotMsg.innerHTML =
-      "<b>Bot:</b> ⚠️ Network or API error. Please try again.";
+    console.error(error);
+    addMessage("Bot", "Error: Unable to connect to AI service.");
   }
-}
+});
