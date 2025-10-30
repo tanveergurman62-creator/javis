@@ -1,15 +1,16 @@
 body {
-  background: radial-gradient(circle at center, #00111a, #000);
-  color: #00ffff;
-  font-family: 'Orbitron', sans-serif;
-  margin: 0;
+  background: #f4f4f4;
+  font-family: Poppins, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.jarvis-container {
+jarvis-container {
   width: 90%;
   max-width: 800px;
   border: 2px solid #00ffff;
@@ -21,26 +22,25 @@ body {
 
 .header h1 {
   text-align: center;
-  color: #00ffff;
+    color: #00ffff;
   margin-bottom: 20px;
 }
-
 .chat-window {
   height: 400px;
   overflow-y: auto;
-  border: 1px solid #007a7a;
+  border: 1px solid #00ffff;
   border-radius: 10px;
   padding: 10px;
-  background-color: rgba(0, 15, 25, 0.8);
+  background: #001020;
 }
 
-.message {
-  margin: 8px 0;
+  .message {
+      margin: 8px 0;
   padding: 10px;
   border-radius: 8px;
-}
+  }
 
-.user {
+   .user {
   text-align: right;
   color: #00ffea;
 }
@@ -50,27 +50,29 @@ body {
   color: #66ffff;
 }
 
+      
 .input-area {
   display: flex;
-  justify-content: space-between;
   margin-top: 15px;
+  justify-content: space-between;
 }
 
 input {
   flex: 1;
-  padding: 10px;
+    padding: 10px;
   border: 2px solid #00ffff;
   border-radius: 10px;
   background: transparent;
   color: #00ffff;
 }
 
+
 button {
   margin-left: 10px;
   padding: 10px 20px;
   background: #00ffff;
   border: none;
-  border-radius: 10px;
+    border-radius: 10px;
   color: #000;
   cursor: pointer;
   transition: 0.3s;
