@@ -1,59 +1,47 @@
-const input = document.getElementById("user-input");
 const sendButton = document.getElementById("send-btn");
+const userInput = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 
-async function sendMessage() {
-  const userMessage = input.value.trim();
-  if (!userMessage) return;
-
-  // Show user message
-  chatBox.innerHTML += `<div class="user-message"><b>You:</b> ${userMessage}</div>`;
-  input.value = "";
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  // Typing indicator
-  chatBox.innerHTML += `<div class="bot-message typing">Bot is thinking...</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer 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", // your Hugging Face token
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inputs: userMessage }),
-      }
-    );
-
-    const data = await response.json();
-    console.log(data); // For debugging
-
-    let botReply = "Sorry, I didn’t get that.";
-
-    // Extract generated text
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      botReply = data[0].generated_text;
-    } else if (data.generated_text) {
-      botReply = data.generated_text;
-    }
-
-    // Remove typing indicator and show response
-    const typingDiv = document.querySelector(".typing");
-    if (typingDiv) typingDiv.remove();
-
-    chatBox.innerHTML += `<div class="bot-message"><b>Bot:</b> ${botReply}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-  } catch (error) {
-    console.error(error);
-    chatBox.innerHTML += `<div class="bot-message error"><b>Bot:</b> Error connecting to AI.</div>`;
-  }
-}
-
 sendButton.addEventListener("click", sendMessage);
-input.addEventListener("keypress", (e) => {
+userInput.addEventListener("keypress", function(e) {
   if (e.key === "Enter") sendMessage();
 });
+
+function sendMessage() {
+  const userText = userInput.value.trim();
+  if (userText === "") return;
+
+  appendMessage("You", userText, "user");
+  userInput.value = "";
+
+  setTimeout(() => {
+    const botReply = getBotResponse(userText.toLowerCase());
+    appendMessage("Bot", botReply, "bot");
+  }, 500);
+}
+
+function appendMessage(sender, message, className) {
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("message", className);
+  msgDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+  chatBox.appendChild(msgDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function getBotResponse(input) {
+  if (input.includes("hello") || input.includes("hi")) {
+    return "Hello! How can I help you today?";
+  } else if (input.includes("joke")) {
+    return "Why did the computer show up at work late? It had a hard drive! 😄";
+  } else if (input.includes("poem")) {
+    return "Roses are red, violets are blue, I'm a chatbot, and I like talking to you! 🤖";
+  } else if (input.includes("your name")) {
+    return "I'm Tanveer's AI Chatbot!";
+  } else if (input.includes("how are you")) {
+    return "I'm just code, but I'm feeling great! How about you?";
+  } else if (input.includes("bye")) {
+    return "Goodbye! Have a great day! 👋";
+  } else {
+    return "Sorry, I didn’t get that.";
+  }
+}
