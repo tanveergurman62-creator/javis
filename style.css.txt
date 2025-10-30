@@ -1,0 +1,18 @@
+*{box-sizing:border-box}
+body{
+  margin:0;height:100vh;background:#212121;color:#e5e5e5;
+  font-family:"Segoe UI",sans-serif;display:flex;justify-content:center;align-items:center;
+}
+.chatgpt-ui{
+  width:420px;height:600px;background:#343541;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 0 15px rgba(0,0,0,0.5);
+}
+header{background:#202123;padding:12px;text-align:center;font-weight:600;color:#fff}
+main{flex:1;padding:15px;overflow-y:auto}
+.message{margin:8px 0;line-height:1.4em}
+.user{text-align:right;color:#00aaff}
+.bot{text-align:left;color:#00ff99}
+footer{display:flex;background:#40414f;padding:10px;gap:8px}
+input{flex:1;padding:10px;border:none;border-radius:6px;outline:none;background:#555;color:#fff}
+button{padding:10px 14px;border:none;border-radius:6px;background:#10a37f;color:#fff;cursor:pointer;font-weight:bold}
+.typing{font-style:italic;opacity:0.8}
