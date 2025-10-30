@@ -1,66 +1,59 @@
-// === Chatbot Script ===
-
-// 🔑 Your Hugging Face API Key
-const HUGGINGFACE_API_KEY = "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";
-
-// === Get HTML elements ===
 const input = document.getElementById("user-input");
-const chatbox = document.getElementById("chat-box");
-const sendBtn = document.getElementById("send-btn");
+const sendButton = document.getElementById("send-btn");
+const chatBox = document.getElementById("chat-box");
 
-// === Send message when button clicked or Enter pressed ===
-sendBtn.addEventListener("click", sendMessage);
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-// === Function to send message ===
 async function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
 
   // Show user message
-  chatbox.innerHTML += `<div class="user"><b>You:</b> ${text}</div>`;
+  chatBox.innerHTML += `<div class="user-message"><b>You:</b> ${userMessage}</div>`;
   input.value = "";
-  chatbox.scrollTop = chatbox.scrollHeight;
+  chatBox.scrollTop = chatBox.scrollHeight;
 
   // Typing indicator
-  const typing = document.createElement("div");
-  typing.className = "bot typing";
-  typing.textContent = "Bot is thinking...";
-  chatbox.appendChild(typing);
-  chatbox.scrollTop = chatbox.scrollHeight;
+  chatBox.innerHTML += `<div class="bot-message typing">Bot is thinking...</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    // === Fetch AI response ===
-    const response = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ inputs: text })
-    });
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer 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", // your Hugging Face token
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inputs: userMessage }),
+      }
+    );
 
     const data = await response.json();
+    console.log(data); // For debugging
 
-    // === Remove typing indicator ===
-    typing.remove();
+    let botReply = "Sorry, I didn’t get that.";
 
-    // === Get model reply ===
-    let reply = "Sorry, I didn’t get that.";
-   if (data && data.generated_text) {
-  reply = data.generated_text;
-} else if (Array.isArray(data) && data.length > 0 && data[0].generated_text) {
-  reply = data[0].generated_text;
-}
-    // === Display bot reply ===
-    chatbox.innerHTML += `<div class="bot"><b>Bot:</b> ${reply}</div>`;
-    chatbox.scrollTop = chatbox.scrollHeight;
+    // Extract generated text
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      botReply = data[0].generated_text;
+    } else if (data.generated_text) {
+      botReply = data.generated_text;
+    }
+
+    // Remove typing indicator and show response
+    const typingDiv = document.querySelector(".typing");
+    if (typingDiv) typingDiv.remove();
+
+    chatBox.innerHTML += `<div class="bot-message"><b>Bot:</b> ${botReply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
 
   } catch (error) {
-    typing.remove();
-    chatbox.innerHTML += `<div class="bot error"><b>Error:</b> ${error.message}</div>`;
+    console.error(error);
+    chatBox.innerHTML += `<div class="bot-message error"><b>Bot:</b> Error connecting to AI.</div>`;
   }
 }
 
+sendButton.addEventListener("click", sendMessage);
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
