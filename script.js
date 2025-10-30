@@ -11,19 +11,19 @@ function sendMessage() {
   const userText = userInput.value.trim();
   if (userText === "") return;
 
-  appendMessage("You", userText, "user");
+  appendMessage("You", userText, "user-message");
   userInput.value = "";
 
   setTimeout(() => {
     const botReply = getBotResponse(userText.toLowerCase());
-    appendMessage("Bot", botReply, "bot");
+    appendMessage("Bot", botReply, "bot-message");
   }, 500);
 }
 
 function appendMessage(sender, message, className) {
   const msgDiv = document.createElement("div");
-  msgDiv.classList.add("message", className);
-  msgDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+  msgDiv.classList.add(className);
+  msgDiv.innerHTML = `<b>${sender}:</b> ${message}`;
   chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -32,15 +32,15 @@ function getBotResponse(input) {
   if (input.includes("hello") || input.includes("hi")) {
     return "Hello! How can I help you today?";
   } else if (input.includes("joke")) {
-    return "Why did the computer show up at work late? It had a hard drive! 😄";
+    return "Why did the computer go to the doctor? Because it had a virus! 💻😆";
   } else if (input.includes("poem")) {
-    return "Roses are red, violets are blue, I'm a chatbot, and I like talking to you! 🤖";
+    return "Roses are red, violets are blue, I’m a chatbot, and I like chatting with you! 🤖";
   } else if (input.includes("your name")) {
-    return "I'm Tanveer's AI Chatbot!";
+    return "I'm Tanveer's AI Chatbot, nice to meet you!";
   } else if (input.includes("how are you")) {
-    return "I'm just code, but I'm feeling great! How about you?";
+    return "I'm just code, but I’m doing great! Thanks for asking.";
   } else if (input.includes("bye")) {
-    return "Goodbye! Have a great day! 👋";
+    return "Goodbye! Have a wonderful day! 👋";
   } else {
     return "Sorry, I didn’t get that.";
   }
