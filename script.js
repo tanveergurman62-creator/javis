@@ -33,7 +33,7 @@ async function sendMessage() {
 
   try {
     // === Fetch AI response ===
-    const response = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+    const response = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
@@ -49,10 +49,11 @@ async function sendMessage() {
 
     // === Get model reply ===
     let reply = "Sorry, I didn’t get that.";
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      reply = data[0].generated_text;
-    }
-
+   if (data && data.generated_text) {
+  reply = data.generated_text;
+} else if (Array.isArray(data) && data.length > 0 && data[0].generated_text) {
+  reply = data[0].generated_text;
+}
     // === Display bot reply ===
     chatbox.innerHTML += `<div class="bot"><b>Bot:</b> ${reply}</div>`;
     chatbox.scrollTop = chatbox.scrollHeight;
@@ -62,3 +63,4 @@ async function sendMessage() {
     chatbox.innerHTML += `<div class="bot error"><b>Error:</b> ${error.message}</div>`;
   }
 }
+
