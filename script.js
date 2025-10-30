@@ -1,56 +1,53 @@
+// ====== My Personal AI ======
+// Make sure you replace YOUR_API_KEY below with your real OpenRouter key
+
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const API_KEY = "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"; // <-- Replace this if needed
+
 const chatBox = document.getElementById("chat-box");
-const inputField = document.getElementById("user-input");
+const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
-sendBtn.addEventListener("click", sendMessage);
-inputField.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
-});
+// When the user clicks Send
+sendBtn.addEventListener("click", async () => {
+  const message = userInput.value.trim();
+  if (!message) return;
 
-async function sendMessage() {
-  const userMessage = inputField.value.trim();
-  if (!userMessage) return;
-
-  appendMessage("user", userMessage);
-  inputField.value = "";
-  appendMessage("bot", "Thinking...");
+  // Display user's message
+  addMessage("You", message);
+  userInput.value = "";
 
   try {
-    const response = await fetch("https://api.openrouter.ai/v1/chat/completions", {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // ⚠️ DON'T hardcode your key here in a public repo
-        // Add it via environment variable or GitHub Secret instead
-        "Authorization": `Bearer ${window.OPENROUTER_KEY || "YOUR_KEY_HERE"}`
+        "Authorization": `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userMessage }],
-        max_tokens: 250,
-        temperature: 0.7
-      })
+        messages: [{ role: "user", content: message }],
+      }),
     });
 
+    if (!response.ok) {
+      throw new Error("API connection failed");
+    }
+
     const data = await response.json();
-    const botReply = data.choices?.[0]?.message?.content || "Sorry, no reply.";
-    replaceLastBotMessage(botReply);
-  } catch (err) {
-    replaceLastBotMessage("Error connecting to AI service.");
-    console.error(err);
+    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn’t understand that.";
+    addMessage("AI", reply);
+  } catch (error) {
+    console.error(error);
+    addMessage("AI", "⚠️ Error connecting to AI service.");
   }
-}
+});
 
-function appendMessage(sender, text) {
-  const div = document.createElement("div");
-  div.className = sender === "user" ? "user-msg" : "bot-msg";
-  div.textContent = text;
-  chatBox.appendChild(div);
+// Function to display messages
+function addMessage(sender, text) {
+  const msg = document.createElement("div");
+  msg.classList.add("message");
+  msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function replaceLastBotMessage(newText) {
-  const botMsgs = chatBox.getElementsByClassName("bot-msg");
-  const last = botMsgs[botMsgs.length - 1];
-  if (last) last.textContent = newText;
 }
