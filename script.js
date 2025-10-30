@@ -24,32 +24,47 @@ async function sendMessage() {
   appendMessage("Bot", "Thinking...", "bot-message");
 
   try {
-    const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer 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",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        inputs: text,
-      }),
-    });
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer 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",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: text,
+          parameters: {
+            max_new_tokens: 200,
+            temperature: 0.7,
+            return_full_text: false,
+          },
+        }),
+      }
+    );
 
     const data = await response.json();
-    console.log(data);
+    console.log("API response:", data);
 
     let botReply = "Sorry, I couldn’t understand that.";
-    if (Array.isArray(data) && data[0]?.generated_text) {
+
+    // ✅ Check all possible Hugging Face response formats
+    if (Array.isArray(data) && data.length > 0 && data[0].generated_text) {
       botReply = data[0].generated_text;
     } else if (data.generated_text) {
       botReply = data.generated_text;
+    } else if (data[0]?.content) {
+      botReply = data[0].content;
+    } else if (data.error) {
+      botReply = `Error: ${data.error}`;
     }
 
+    // Replace placeholder "Thinking..." with AI response
     const lastBotMsg = chatBox.querySelector(".bot-message:last-child");
     lastBotMsg.innerHTML = `<b>Bot:</b> ${botReply}`;
   } catch (error) {
-    console.error(error);
+    console.error("Fetch error:", error);
     const lastBotMsg = chatBox.querySelector(".bot-message:last-child");
-    lastBotMsg.innerHTML = `<b>Bot:</b> Oops! Something went wrong.`;
+    lastBotMsg.innerHTML = `<b>Bot:</b> ⚠️ Something went wrong. Check your API key or network.`;
   }
 }
