@@ -3,7 +3,12 @@ const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const imageBtn = document.getElementById('image-btn');
 
-// Function to append messages
+const msgDiv = document.createElement('div');
+  msgDiv.classList.add('message', sender);
+  msgDiv.innerText = text;
+  chatWindow.appendChild(msgDiv);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
 function addMessage(sender, text) {
   const msgDiv = document.createElement('div');
   msgDiv.classList.add('message', sender);
