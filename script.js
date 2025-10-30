@@ -1,50 +1,64 @@
+// === Chatbot Script ===
+
+// 🔑 Your Hugging Face API Key
 const HUGGINGFACE_API_KEY = "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";
+
+// === Get HTML elements ===
 const input = document.getElementById("user-input");
-const btn = document.getElementById("send-btn");
-const chatBox = document.getElementById("chat-box");
+const chatbox = document.getElementById("chat-box");
+const sendBtn = document.getElementById("send-btn");
 
-btn.onclick = sendMessage;
-input.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
-
-async function sendMessage(){
-  const text = input.value.trim();
-  if (!text) return;
-  chatBox.innerHTML += `<div class="message user"><b>You:</b> ${escapeHtml(text)}</div>`;
-  input.value = "";
-
-  // typing indicator
-  const typing = document.createElement("div");
-  typing.className = "message bot typing";
-  typing.innerText = "AI is typing...";
-  chatBox.appendChild(typing);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  try {
-    // NOTE: This example calls a Hugging Face public model endpoint without an API key.
-    // It may be rate limited, blocked by CORS, or return short replies.
-    const response = await fetch("https://api-inference.huggingface.co/models/gpt2", {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ inputs: text })
+// === Send message when button clicked or Enter pressed ===
+sendBtn.addEventListener("click", sendMessage);
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
 });
 
-   const data = await resp.json();
-    const reply = data[0]?.generated_text?.slice(text.length).trim() || "Sorry, I couldn't understand that.";
-    chatBox.removeChild(typing);
-    chatBox.innerHTML += `<div class="message bot"><b>AI:</b> ${escapeHtml(reply)}</div>`;
-  } catch (err) {
-    chatBox.removeChild(typing);
-    chatBox.innerHTML += `<div class="message bot"><b>AI:</b> Error contacting AI service.</div>`;
-    console.error(err);
-  } finally {
-    chatBox.scrollTop = chatBox.scrollHeight;
+// === Function to send message ===
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Show user message
+  chatbox.innerHTML += `<div class="user"><b>You:</b> ${text}</div>`;
+  input.value = "";
+  chatbox.scrollTop = chatbox.scrollHeight;
+
+  // Typing indicator
+  const typing = document.createElement("div");
+  typing.className = "bot typing";
+  typing.textContent = "Bot is thinking...";
+  chatbox.appendChild(typing);
+  chatbox.scrollTop = chatbox.scrollHeight;
+
+  try {
+    // === Fetch AI response ===
+    const response = await fetch("https://api-inference.huggingface.co/models/gpt2", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ inputs: text })
+    });
+
+    const data = await response.json();
+
+    // === Remove typing indicator ===
+    typing.remove();
+
+    // === Get model reply ===
+    let reply = "Sorry, I didn’t get that.";
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      reply = data[0].generated_text;
+    }
+
+    // === Display bot reply ===
+    chatbox.innerHTML += `<div class="bot"><b>Bot:</b> ${reply}</div>`;
+    chatbox.scrollTop = chatbox.scrollHeight;
+
+  } catch (error) {
+    typing.remove();
+    chatbox.innerHTML += `<div class="bot error"><b>Error:</b> ${error.message}</div>`;
   }
 }
-
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-}
-
